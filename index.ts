@@ -46,7 +46,8 @@ app.get('/doujin', async (req: Request, res: Response) => {
     const { images } = await doujin.getContents();
 
     const pdfFilename = path.join(__dirname, `${query}.pdf`);
-    await images.PDF(pdfFilename);
+    // Make sure to use a method that supports creating a PDF from images
+    await images.createPDF(pdfFilename); // Adjust this line according to the actual method provided by nhentai-ts
 
     const pdfUrl = `${req.protocol}://${req.get('host')}/${path.basename(pdfFilename)}`;
     res.json({ pdfUrl });
