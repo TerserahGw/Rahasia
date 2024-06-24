@@ -35,6 +35,11 @@ if (!fs.existsSync(pdfDir)) {
   fs.mkdirSync(pdfDir);
 }
 
+// Menambahkan middleware untuk menangani rute '/'
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // Create an endpoint that triggers the second async function
 app.get('/doujin', async (req: Request, res: Response) => {
   const query = req.query.q as string;
