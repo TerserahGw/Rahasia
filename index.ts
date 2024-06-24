@@ -29,6 +29,12 @@ cron.schedule('* * * * *', async () => {
   }
 });
 
+// Ensure the pdf directory exists
+const pdfDir = path.join(__dirname, 'pdf');
+if (!fs.existsSync(pdfDir)) {
+  fs.mkdirSync(pdfDir);
+}
+
 // Create an endpoint that triggers the second async function
 app.get('/doujin', async (req: Request, res: Response) => {
   const query = req.query.q as string;
@@ -45,20 +51,29 @@ app.get('/doujin', async (req: Request, res: Response) => {
     const doujin = data[0];
     const { images } = await doujin.getContents();
 
-    const pdfFilename = path.join(__dirname, `${query}.pdf`);
-    // Make sure to use a method that supports creating a PDF from images
-    await images.createPDF(pdfFilename); // Adjust this line according to the actual method provided by nhentai-ts
+    const pdfFilename = path.join(pdfDir, `${query}.pdf`);
+    await images.PDF(pdfFilename);
 
-    const pdfUrl = `${req.protocol}://${req.get('host')}/${path.basename(pdfFilename)}`;
-    res.json({ pdfUrl });
+    res.download(pdfFilename, `${query}.pdf`, (err) => {
+      if (err) {
+        console.error('Error sending the file:', err);
+        res.status(500).send('Error sending the file');
+      } else {
+        // Delete the file after sending it
+        fs.unlink(pdfFilename, (err) => {
+          if (err) {
+            console.error('Error deleting the file:', err);
+          } else {
+            console.log('File deleted:', pdfFilename);
+          }
+        });
+      }
+    });
   } catch (error) {
     console.error('Error searching nhentai:', error);
     res.status(500).send('Error searching nhentai');
   }
 });
-
-// Serve generated PDF files
-app.use(express.static(__dirname));
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
