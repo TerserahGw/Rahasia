@@ -36,8 +36,8 @@ if (!fs.existsSync(pdfDir)) {
 }
 
 // Menambahkan middleware untuk menangani rute '/'
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+app.get('/', (req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Create an endpoint that triggers the second async function
